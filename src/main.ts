@@ -160,7 +160,7 @@ export function updateControlButton(): void {
   }
   if (!controlBtn || !controlBtnIcon || !controlBtnLabel) return;
 
-  const btnDiv = controlBtn.querySelector('div');
+  const btnDiv = controlBtn.querySelector('.btn-circle');
 
   if (state.isRunning) {
     // Timer is running - show Pause
