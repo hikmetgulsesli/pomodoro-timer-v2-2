@@ -35,5 +35,5 @@ class MockAudioContext {
 }
 
 // Set up global mocks
-global.AudioContext = MockAudioContext as unknown as typeof AudioContext;
-global.webkitAudioContext = MockAudioContext as unknown as typeof AudioContext;
+(globalThis as any).AudioContext = MockAudioContext as unknown as typeof AudioContext;
+(globalThis as any).webkitAudioContext = MockAudioContext as unknown as typeof AudioContext;
