@@ -1,110 +1,132 @@
-// Pomodoro Timer - TypeScript Implementation with Drift Correction
+// Pomodoro Timer - TypeScript Implementation
+// Imports design tokens from design-tokens.css
 
 export interface TimerState {
   timeRemaining: number; // in seconds
   isRunning: boolean;
+  isPaused: boolean;
   isWorkSession: boolean;
   sessionCount: number;
   intervalId: number | null;
-  targetEndTime: number | null; // timestamp when timer should end (for drift correction)
+  lastTickTime: number | null; // timestamp for visibility API handling
 }
 
 export const WORK_DURATION = 25 * 60; // 25 minutes
 export const BREAK_DURATION = 5 * 60; // 5 minutes
 export const MAX_SESSIONS = 4;
 
-// Module-level state
-const state: TimerState = {
+export const state: TimerState = {
   timeRemaining: WORK_DURATION,
   isRunning: false,
+  isPaused: false,
   isWorkSession: true,
   sessionCount: 1,
   intervalId: null,
-  targetEndTime: null,
+  lastTickTime: null,
 };
 
-// DOM Elements (will be initialized in initApp)
+// DOM Elements - lazy loaded
 let timerDisplay: HTMLElement | null = null;
-let sessionTypeEl: HTMLElement | null = null;
-let sessionCountEl: HTMLElement | null = null;
+let sessionLabel: HTMLElement | null = null;
+let sessionCountDisplay: HTMLElement | null = null;
 let startBtn: HTMLButtonElement | null = null;
 let pauseBtn: HTMLButtonElement | null = null;
 let resetBtn: HTMLButtonElement | null = null;
 
-// AudioContext instance (created lazily for performance)
-let audioContext: AudioContext | null = null;
+/**
+ * Initialize DOM element references
+ */
+export function initDOMElements(): boolean {
+  timerDisplay = document.getElementById('timer-display');
+  sessionLabel = document.getElementById('session-type');
+  sessionCountDisplay = document.getElementById('session-count');
+  startBtn = document.getElementById('start-btn') as HTMLButtonElement | null;
+  pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement | null;
+  resetBtn = document.getElementById('reset-btn') as HTMLButtonElement | null;
 
-function getAudioContext(): AudioContext {
-  if (!audioContext) {
-    const AudioContextClass = (window as unknown as { AudioContext: typeof AudioContext }).AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    audioContext = new AudioContextClass();
-  }
-  return audioContext;
+  return !!timerDisplay && !!sessionLabel && !!sessionCountDisplay &&
+         !!startBtn && !!pauseBtn && !!resetBtn;
 }
 
-// Format seconds to MM:SS
+/**
+ * Format seconds into MM:SS display
+ * @param seconds - Time in seconds
+ * @returns Formatted time string (e.g., "25:00")
+ */
 export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Calculate time remaining based on target end time (drift correction)
-export function calculateTimeRemaining(targetEndTime: number): number {
-  const now = Date.now();
-  const remaining = Math.ceil((targetEndTime - now) / 1000);
-  return Math.max(0, remaining);
-}
-
-// Update the display
-function updateDisplay(): void {
-  if (!timerDisplay || !sessionTypeEl || !sessionCountEl) return;
-
-  timerDisplay.textContent = formatTime(state.timeRemaining);
-  sessionTypeEl.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
-  sessionCountEl.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
-
-  // Update phase indicator colors based on session type (red for work, green for break)
-  // Use classList to preserve other classes while toggling color
-  const colorClass = state.isWorkSession ? 'text-tomato' : 'text-green-600';
-  const oppositeClass = state.isWorkSession ? 'text-green-600' : 'text-tomato';
-  sessionTypeEl.classList.remove(oppositeClass);
-  sessionTypeEl.classList.add(colorClass);
-}
-
-// Update button visibility
-function updateButtons(): void {
+/**
+ * Update control button visibility based on timer state
+ */
+export function updateControlButton(): void {
   if (!startBtn || !pauseBtn) return;
 
   if (state.isRunning) {
-    startBtn.classList.add('hidden');
-    pauseBtn.classList.remove('hidden');
+    // Timer is running - show Pause, hide Start
+    startBtn.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    pauseBtn.setAttribute('aria-label', 'Pause Timer');
   } else {
-    startBtn.classList.remove('hidden');
-    pauseBtn.classList.add('hidden');
+    // Timer is stopped or paused - show Start, hide Pause
+    startBtn.style.display = 'flex';
+    pauseBtn.style.display = 'none';
+    startBtn.setAttribute('aria-label', state.isPaused ? 'Resume Timer' : 'Start Timer');
   }
 }
 
-// Play notification sound using Web Audio API
-export function playNotificationSound(): void {
-  const ctx = getAudioContext();
+/**
+ * Update the timer display with current state
+ */
+export function updateDisplay(): void {
+  if (!timerDisplay || !sessionLabel || !sessionCountDisplay) return;
 
-  const playBeep = (frequency: number, duration: number, delay: number) => {
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+  timerDisplay.textContent = formatTime(state.timeRemaining);
+  sessionLabel.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
+  sessionCountDisplay.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
+
+  // Update colors based on session type using CSS variables
+  if (state.isWorkSession) {
+    sessionLabel.style.color = 'var(--color-work)';
+    sessionLabel.classList.remove('text-green-500');
+    sessionLabel.classList.add('text-tomato');
+  } else {
+    sessionLabel.style.color = 'var(--color-break)';
+    sessionLabel.classList.remove('text-tomato');
+    sessionLabel.classList.add('text-green-500');
+  }
+}
+
+/**
+ * Play notification sound when timer completes
+ * Uses Web Audio API for a pleasant beep pattern
+ */
+export function playNotificationSound(): void {
+  // Create an audio context for notification sound
+  const AudioContextClass = window.AudioContext ||
+    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const audioContext = new AudioContextClass();
+
+  // Create a pleasant beep pattern
+  const playBeep = (frequency: number, duration: number, delay: number): void => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(audioContext.destination);
 
     oscillator.frequency.value = frequency;
     oscillator.type = 'sine';
 
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime + delay);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + delay + duration);
+    const startTime = audioContext.currentTime + delay;
+    gainNode.gain.setValueAtTime(0.3, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
 
-    oscillator.start(ctx.currentTime + delay);
-    oscillator.stop(ctx.currentTime + delay + duration);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
   };
 
   // Play 3 beeps
@@ -113,8 +135,10 @@ export function playNotificationSound(): void {
   playBeep(1100, 0.4, 0.6);
 }
 
-// Handle timer completion and switch phases
-function handleTimerComplete(): void {
+/**
+ * Handle timer completion - switch between work and break sessions
+ */
+export function handleTimerComplete(autoStart: boolean = true): void {
   stopTimer();
   playNotificationSound();
 
@@ -128,6 +152,7 @@ function handleTimerComplete(): void {
     state.sessionCount++;
 
     if (state.sessionCount > MAX_SESSIONS) {
+      // All sessions complete, reset
       state.sessionCount = 1;
     }
 
@@ -135,94 +160,177 @@ function handleTimerComplete(): void {
   }
 
   updateDisplay();
-}
+  updateControlButton();
 
-// Tick handler with drift correction
-function tick(): void {
-  if (!state.targetEndTime) return;
-
-  // Calculate remaining time based on target end time (handles background tabs)
-  const remaining = calculateTimeRemaining(state.targetEndTime);
-  state.timeRemaining = remaining;
-
-  if (state.timeRemaining <= 0) {
-    handleTimerComplete();
-  } else {
-    updateDisplay();
+  // Auto-start the next phase
+  if (autoStart) {
+    startTimer();
   }
 }
 
-// Start the timer with drift-corrected timing
+/**
+ * Start the timer countdown
+ */
 export function startTimer(): void {
   if (state.isRunning) return;
 
   state.isRunning = true;
-  // Calculate target end time based on current remaining time
-  state.targetEndTime = Date.now() + (state.timeRemaining * 1000);
+  state.isPaused = false;
+  state.lastTickTime = Date.now();
 
-  state.intervalId = window.setInterval(tick, 100); // Check every 100ms for responsiveness
+  state.intervalId = window.setInterval(() => {
+    state.lastTickTime = Date.now();
+    state.timeRemaining--;
 
-  updateButtons();
-  updateDisplay();
+    if (state.timeRemaining <= 0) {
+      handleTimerComplete();
+      return;
+    }
+
+    updateDisplay();
+  }, 1000);
+
+  updateControlButton();
 }
 
-// Stop/pause the timer
+/**
+ * Pause the timer (freezes countdown)
+ */
+export function pauseTimer(): void {
+  if (!state.isRunning) return;
+
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  state.isRunning = false;
+  state.isPaused = true;
+  // Keep lastTickTime for reference, resumeTimer will reset it
+
+  updateControlButton();
+}
+
+/**
+ * Resume the timer from paused state
+ */
+export function resumeTimer(): void {
+  if (state.isRunning) return;
+
+  state.isRunning = true;
+  state.isPaused = false;
+  state.lastTickTime = Date.now();
+
+  state.intervalId = window.setInterval(() => {
+    state.lastTickTime = Date.now();
+    state.timeRemaining--;
+
+    if (state.timeRemaining <= 0) {
+      handleTimerComplete();
+      return;
+    }
+
+    updateDisplay();
+  }, 1000);
+
+  updateControlButton();
+}
+
+/**
+ * Stop/pause the timer
+ */
 export function stopTimer(): void {
   if (state.intervalId !== null) {
     clearInterval(state.intervalId);
     state.intervalId = null;
   }
-
   state.isRunning = false;
-  state.targetEndTime = null;
+  state.isPaused = false;
+  state.lastTickTime = null;
 
-  updateButtons();
-  updateDisplay();
+  updateControlButton();
 }
 
-// Reset timer to initial state
+/**
+ * Handle visibility change - correct timer drift when tab becomes visible
+ * Uses document.visibilityState to detect background/foreground
+ */
+export function handleVisibilityChange(): void {
+  if (document.hidden || !state.isRunning || state.lastTickTime === null) {
+    return;
+  }
+
+  // Tab is now visible - calculate elapsed time since last tick
+  const now = Date.now();
+  const elapsedMs = now - state.lastTickTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
+
+  if (elapsedSeconds > 0) {
+    // Subtract elapsed seconds from remaining time
+    state.timeRemaining = Math.max(0, state.timeRemaining - elapsedSeconds);
+    state.lastTickTime = now;
+    updateDisplay();
+
+    // If timer completed while in background, handle completion
+    if (state.timeRemaining <= 0) {
+      handleTimerComplete();
+    }
+  }
+}
+
+/**
+ * Reset the timer to initial state
+ */
 export function resetTimer(): void {
   stopTimer();
   state.isWorkSession = true;
   state.sessionCount = 1;
   state.timeRemaining = WORK_DURATION;
-  state.targetEndTime = null;
+  state.isPaused = false;
+  state.lastTickTime = null;
   updateDisplay();
+  updateControlButton();
 }
 
-// Get current timer state (for testing)
-export function getState(): TimerState {
-  return { ...state };
+/**
+ * Handle control button click - toggles between Start/Pause/Resume
+ */
+export function handleControlClick(): void {
+  if (state.isRunning) {
+    pauseTimer();
+  } else if (state.isPaused) {
+    resumeTimer();
+  } else {
+    startTimer();
+  }
 }
 
-// Initialize the app
-function initApp(): void {
-  timerDisplay = document.getElementById('timer-display') as HTMLElement;
-  sessionTypeEl = document.getElementById('session-type') as HTMLElement;
-  sessionCountEl = document.getElementById('session-count') as HTMLElement;
-  startBtn = document.getElementById('start-btn') as HTMLButtonElement;
-  pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
-  resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
-
-  if (!timerDisplay || !startBtn || !pauseBtn || !resetBtn) {
-    console.error('Required DOM elements not found');
+/**
+ * Initialize the application
+ */
+function init(): void {
+  if (!initDOMElements()) {
+    // DOM elements not found, likely in test environment
     return;
   }
 
-  // Event listeners
-  startBtn.addEventListener('click', startTimer);
-  pauseBtn.addEventListener('click', stopTimer);
-  resetBtn.addEventListener('click', resetTimer);
+  // Event Listeners
+  startBtn?.addEventListener('click', handleControlClick);
+  pauseBtn?.addEventListener('click', handleControlClick);
+  resetBtn?.addEventListener('click', resetTimer);
 
-  // Initialize display
+  // Visibility API - handle tab backgrounding
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  // Initialize display on load
   updateDisplay();
+  updateControlButton();
 }
 
-// Initialize when DOM is ready - only in browser environment
+// Initialize when DOM is ready
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initApp();
+    init();
   }
 }
