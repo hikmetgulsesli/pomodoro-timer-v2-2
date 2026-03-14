@@ -39,12 +39,9 @@ function updateDisplay(): void {
   sessionType.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
   sessionCountDisplay.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
   
-  // Update colors based on session type
-  const timerContainer = timerDisplay.parentElement;
-  if (timerContainer) {
-    timerContainer.classList.toggle('text-tomato', state.isWorkSession);
-    timerContainer.classList.toggle('text-green-500', !state.isWorkSession);
-  }
+  // Update phase indicator colors based on session type (red for work, green for break)
+  sessionType.classList.toggle('text-tomato', state.isWorkSession);
+  sessionType.classList.toggle('text-green-600', !state.isWorkSession);
 }
 
 function playNotificationSound(): void {
