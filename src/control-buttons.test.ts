@@ -52,16 +52,22 @@ describe('Control Buttons', () => {
     state.sessionCount = 1;
     state.intervalId = null;
 
-    // Setup DOM with single control button
+    // Setup DOM with separate Start and Pause buttons (matching index.html)
     document.body.innerHTML = `
       <div id="timer-display">25:00</div>
       <div id="session-type">WORK</div>
       <div id="session-count">Session 1 of 4</div>
-      <button id="control-btn" aria-label="Start Timer">
+      <button id="start-btn" aria-label="Start Timer">
         <div class="bg-slate-blue">
-          <span id="control-btn-icon">play_arrow</span>
+          <span>play_arrow</span>
         </div>
-        <span id="control-btn-label">Start</span>
+        <span>Start</span>
+      </button>
+      <button id="pause-btn" aria-label="Pause Timer" style="display: none;">
+        <div class="bg-orange-pause">
+          <span>pause</span>
+        </div>
+        <span>Pause</span>
       </button>
       <button id="reset-btn">Reset</button>
     `;
@@ -94,20 +100,18 @@ describe('Control Buttons', () => {
       expect(state.timeRemaining).toBe(initialTime - 5);
     });
 
-    test('should change button label to Pause when timer is running', () => {
-      const label = document.getElementById('control-btn-label') as HTMLElement;
-      const icon = document.getElementById('control-btn-icon') as HTMLElement;
-      const btn = document.getElementById('control-btn') as HTMLButtonElement;
+    test('should show Pause button and hide Start button when timer is running', () => {
+      const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+      const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
 
-      expect(label.textContent).toBe('Start');
-      expect(icon.textContent).toBe('play_arrow');
+      expect(startBtn.style.display).toBe('');
+      expect(pauseBtn.style.display).toBe('none');
 
       startTimer();
       updateControlButton();
 
-      expect(label.textContent).toBe('Pause');
-      expect(icon.textContent).toBe('pause');
-      expect(btn.getAttribute('aria-label')).toBe('Pause Timer');
+      expect(startBtn.style.display).toBe('none');
+      expect(pauseBtn.style.display).toBe('flex');
     });
   });
 
@@ -131,10 +135,9 @@ describe('Control Buttons', () => {
       expect(state.timeRemaining).toBe(timeAfter3Seconds);
     });
 
-    test('should change button label to Resume when paused', () => {
-      const label = document.getElementById('control-btn-label') as HTMLElement;
-      const icon = document.getElementById('control-btn-icon') as HTMLElement;
-      const btn = document.getElementById('control-btn') as HTMLButtonElement;
+    test('should show Start button (Resume) and hide Pause button when paused', () => {
+      const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+      const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
 
       startTimer();
       updateControlButton();
@@ -142,9 +145,9 @@ describe('Control Buttons', () => {
       pauseTimer();
       updateControlButton();
 
-      expect(label.textContent).toBe('Resume');
-      expect(icon.textContent).toBe('play_arrow');
-      expect(btn.getAttribute('aria-label')).toBe('Resume Timer');
+      expect(startBtn.style.display).toBe('flex');
+      expect(pauseBtn.style.display).toBe('none');
+      expect(startBtn.getAttribute('aria-label')).toBe('Resume Timer');
     });
   });
 
@@ -192,21 +195,20 @@ describe('Control Buttons', () => {
       expect(state.isRunning).toBe(false);
     });
 
-    test('should reset button label back to Start', () => {
-      const label = document.getElementById('control-btn-label') as HTMLElement;
-      const icon = document.getElementById('control-btn-icon') as HTMLElement;
-      const btn = document.getElementById('control-btn') as HTMLButtonElement;
+    test('should show Start button and hide Pause button after reset', () => {
+      const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+      const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
 
       startTimer();
       updateControlButton();
-      expect(label.textContent).toBe('Pause');
+      expect(startBtn.style.display).toBe('none');
+      expect(pauseBtn.style.display).toBe('flex');
 
       resetTimer();
       updateControlButton();
 
-      expect(label.textContent).toBe('Start');
-      expect(icon.textContent).toBe('play_arrow');
-      expect(btn.getAttribute('aria-label')).toBe('Start Timer');
+      expect(startBtn.style.display).toBe('flex');
+      expect(pauseBtn.style.display).toBe('none');
     });
   });
 
@@ -257,11 +259,17 @@ describe('Timer Completion', () => {
       <div id="timer-display">25:00</div>
       <div id="session-type">WORK</div>
       <div id="session-count">Session 1 of 4</div>
-      <button id="control-btn" aria-label="Start Timer">
+      <button id="start-btn" aria-label="Start Timer">
         <div class="bg-slate-blue">
-          <span id="control-btn-icon">play_arrow</span>
+          <span>play_arrow</span>
         </div>
-        <span id="control-btn-label">Start</span>
+        <span>Start</span>
+      </button>
+      <button id="pause-btn" aria-label="Pause Timer" style="display: none;">
+        <div class="bg-orange-pause">
+          <span>pause</span>
+        </div>
+        <span>Pause</span>
       </button>
       <button id="reset-btn">Reset</button>
     `;
@@ -315,11 +323,17 @@ describe('Display Updates', () => {
       <div id="timer-display">25:00</div>
       <div id="session-type">WORK</div>
       <div id="session-count">Session 1 of 4</div>
-      <button id="control-btn" aria-label="Start Timer">
+      <button id="start-btn" aria-label="Start Timer">
         <div class="bg-slate-blue">
-          <span id="control-btn-icon">play_arrow</span>
+          <span>play_arrow</span>
         </div>
-        <span id="control-btn-label">Start</span>
+        <span>Start</span>
+      </button>
+      <button id="pause-btn" aria-label="Pause Timer" style="display: none;">
+        <div class="bg-orange-pause">
+          <span>pause</span>
+        </div>
+        <span>Pause</span>
       </button>
       <button id="reset-btn">Reset</button>
     `;
@@ -386,9 +400,13 @@ describe('DOM Structure', () => {
         <div id="timer-display">25:00</div>
         <div id="session-type">WORK</div>
         <div id="session-count">Session 1 of 4</div>
-        <button id="control-btn">
-          <span id="control-btn-icon">play_arrow</span>
-          <span id="control-btn-label">Start</span>
+        <button id="start-btn">
+          <span>play_arrow</span>
+          <span>Start</span>
+        </button>
+        <button id="pause-btn">
+          <span>pause</span>
+          <span>Pause</span>
         </button>
         <button id="reset-btn">Reset</button>
       </body>
@@ -399,10 +417,9 @@ describe('DOM Structure', () => {
     expect(html).toContain('timer-display');
     expect(html).toContain('session-type');
     expect(html).toContain('session-count');
-    expect(html).toContain('control-btn');
+    expect(html).toContain('start-btn');
+    expect(html).toContain('pause-btn');
     expect(html).toContain('reset-btn');
-    expect(html).toContain('control-btn-icon');
-    expect(html).toContain('control-btn-label');
   });
 
   test('should have proper meta tags for responsive design', () => {
