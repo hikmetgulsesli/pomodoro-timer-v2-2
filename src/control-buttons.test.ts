@@ -5,7 +5,6 @@
 
 import {
   state,
-  formatTime,
   startTimer,
   pauseTimer,
   resumeTimer,
@@ -14,11 +13,34 @@ import {
   updateControlButton,
   updateDisplay,
   initDOMElements,
-  handleTimerComplete,
   WORK_DURATION,
-  BREAK_DURATION,
-  MAX_SESSIONS
+  BREAK_DURATION
 } from './main';
+
+// Mock AudioContext
+class MockAudioContext {
+  currentTime = 0;
+  createOscillator = jest.fn(() => ({
+    connect: jest.fn(),
+    frequency: { value: 0 },
+    type: 'sine',
+    start: jest.fn(),
+    stop: jest.fn()
+  }));
+  createGain = jest.fn(() => ({
+    connect: jest.fn(),
+    gain: {
+      setValueAtTime: jest.fn(),
+      exponentialRampToValueAtTime: jest.fn()
+    }
+  }));
+  destination = {};
+}
+
+Object.defineProperty(window, 'AudioContext', {
+  writable: true,
+  value: MockAudioContext
+});
 
 describe('Control Buttons', () => {
   beforeEach(() => {
