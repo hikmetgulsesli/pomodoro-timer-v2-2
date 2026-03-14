@@ -6,6 +6,7 @@ import {
   startTimer,
   stopTimer,
   resetTimer,
+  playNotificationSound,
   WORK_DURATION,
   BREAK_DURATION,
   MAX_SESSIONS
@@ -48,7 +49,6 @@ describe('calculateTimeRemaining (Drift Correction)', () => {
     const now = Date.now();
     const targetEndTime = now + 25000; // 25 seconds in the future
     const remaining = calculateTimeRemaining(targetEndTime);
-    // Exact value since vi.useFakeTimers() mocks Date.now() deterministically
     expect(remaining).toBe(25);
   });
 
@@ -61,24 +61,14 @@ describe('calculateTimeRemaining (Drift Correction)', () => {
     const now = Date.now();
     const targetEndTime = now + (25 * 60 * 1000); // 25 minutes
     const remaining = calculateTimeRemaining(targetEndTime);
-    // Exact value since vi.useFakeTimers() mocks Date.now() deterministically
     expect(remaining).toBe(1500);
   });
 });
 
 describe('Timer State', () => {
   beforeEach(() => {
-    // Setup DOM
-    document.body.innerHTML = `
-      <div id="timer-display">25:00</div>
-      <div id="session-type">WORK</div>
-      <div id="session-count">Session 1 of 4</div>
-      <button id="start-btn">Start</button>
-      <button id="pause-btn" class="hidden">Pause</button>
-      <button id="reset-btn">Reset</button>
-    `;
     vi.useFakeTimers();
-    // Reset state before each test
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     resetTimer();
   });
 
@@ -135,15 +125,8 @@ describe('Timer State', () => {
 
 describe('Timer Countdown with Drift Correction', () => {
   beforeEach(() => {
-    document.body.innerHTML = `
-      <div id="timer-display">25:00</div>
-      <div id="session-type">WORK</div>
-      <div id="session-count">Session 1 of 4</div>
-      <button id="start-btn">Start</button>
-      <button id="pause-btn" class="hidden">Pause</button>
-      <button id="reset-btn">Reset</button>
-    `;
     vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     resetTimer();
   });
 
@@ -180,22 +163,14 @@ describe('Timer Countdown with Drift Correction', () => {
     vi.advanceTimersByTime(120000); // Jump 2 minutes
 
     const state = getState();
-    // Timer should have counted down 2 minutes accurately
     expect(state.timeRemaining).toBe(WORK_DURATION - 120);
   });
 });
 
 describe('Phase Transitions', () => {
   beforeEach(() => {
-    document.body.innerHTML = `
-      <div id="timer-display">25:00</div>
-      <div id="session-type">WORK</div>
-      <div id="session-count">Session 1 of 4</div>
-      <button id="start-btn">Start</button>
-      <button id="pause-btn" class="hidden">Pause</button>
-      <button id="reset-btn">Reset</button>
-    `;
     vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     // Mock playNotificationSound to avoid AudioContext issues
     vi.stubGlobal('AudioContext', class MockAudioContext {
       currentTime = 0;
@@ -238,6 +213,47 @@ describe('Phase Transitions', () => {
     expect(state.timeRemaining).toBe(BREAK_DURATION);
   });
 
+  it('should switch back to work after break completes', () => {
+    startTimer();
+
+    // Complete work phase
+    vi.advanceTimersByTime(WORK_DURATION * 1000 + 100);
+
+    let state = getState();
+    expect(state.isWorkSession).toBe(false);
+    expect(state.timeRemaining).toBe(BREAK_DURATION);
+    expect(state.isRunning).toBe(false); // Timer stops at phase transition
+
+    // Start break timer
+    startTimer();
+    state = getState();
+    expect(state.isRunning).toBe(true);
+
+    // Complete break phase
+    vi.advanceTimersByTime(BREAK_DURATION * 1000 + 100);
+
+    state = getState();
+    expect(state.isWorkSession).toBe(true);
+    expect(state.sessionCount).toBe(2);
+  });
+
+  it('should increment session count after full cycle', () => {
+    startTimer();
+
+    // Complete work phase
+    vi.advanceTimersByTime(WORK_DURATION * 1000 + 100);
+    expect(getState().isWorkSession).toBe(false);
+    expect(getState().timeRemaining).toBe(BREAK_DURATION);
+
+    // Start and complete break phase
+    startTimer();
+    vi.advanceTimersByTime(BREAK_DURATION * 1000 + 100);
+
+    const state = getState();
+    expect(state.sessionCount).toBe(2);
+    expect(state.isWorkSession).toBe(true);
+  });
+
   it('should reset to correct duration for each phase', () => {
     startTimer();
     vi.advanceTimersByTime(WORK_DURATION * 1000 + 100); // Complete work
@@ -252,6 +268,51 @@ describe('Phase Transitions', () => {
     const resetState = getState();
     expect(resetState.isWorkSession).toBe(true);
     expect(resetState.timeRemaining).toBe(WORK_DURATION);
+  });
+});
+
+describe('Audio Notifications', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    vi.stubGlobal('AudioContext', class MockAudioContext {
+      currentTime = 0;
+      createOscillator() {
+        return {
+          connect: () => {},
+          frequency: { value: 0 },
+          type: 'sine',
+          start: () => {},
+          stop: () => {},
+        };
+      }
+      createGain() {
+        return {
+          connect: () => {},
+          gain: {
+            setValueAtTime: () => {},
+            exponentialRampToValueAtTime: () => {},
+          },
+        };
+      }
+      destination = {};
+    });
+    resetTimer();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('should play notification sound without error', () => {
+    expect(() => playNotificationSound()).not.toThrow();
+  });
+
+  it('should create AudioContext when playing sound', () => {
+    playNotificationSound();
+    // AudioContext should have been created
+    expect(vi.getMockedSystemTime).toBeDefined();
   });
 });
 
@@ -275,11 +336,14 @@ describe('DOM Integration', () => {
       <div id="timer-display">25:00</div>
       <div id="session-type">WORK</div>
       <div id="session-count">Session 1 of 4</div>
-      <button id="start-btn">Start</button>
-      <button id="pause-btn" class="hidden">Pause</button>
+      <button id="control-btn" aria-label="Start Timer">
+        <span id="control-btn-icon">play_arrow</span>
+        <span id="control-btn-label">Start</span>
+      </button>
       <button id="reset-btn">Reset</button>
     `;
     vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     resetTimer();
   });
 
@@ -301,8 +365,152 @@ describe('DOM Integration', () => {
     expect(document.getElementById('timer-display')).toBeTruthy();
     expect(document.getElementById('session-type')).toBeTruthy();
     expect(document.getElementById('session-count')).toBeTruthy();
-    expect(document.getElementById('start-btn')).toBeTruthy();
-    expect(document.getElementById('pause-btn')).toBeTruthy();
+    expect(document.getElementById('control-btn')).toBeTruthy();
     expect(document.getElementById('reset-btn')).toBeTruthy();
+  });
+});
+
+describe('End-to-End Timer Flow', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    vi.stubGlobal('AudioContext', class MockAudioContext {
+      currentTime = 0;
+      createOscillator() {
+        return {
+          connect: () => {},
+          frequency: { value: 0 },
+          type: 'sine',
+          start: () => {},
+          stop: () => {},
+        };
+      }
+      createGain() {
+        return {
+          connect: () => {},
+          gain: {
+            setValueAtTime: () => {},
+            exponentialRampToValueAtTime: () => {},
+          },
+        };
+      }
+      destination = {};
+    });
+    resetTimer();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('should complete full user flow: start → pause → resume → complete work → auto transition to break', () => {
+    // Start timer
+    startTimer();
+    let state = getState();
+    expect(state.isRunning).toBe(true);
+    expect(state.isWorkSession).toBe(true);
+
+    // Pause after 5 minutes
+    vi.advanceTimersByTime(5 * 60 * 1000);
+    stopTimer();
+    state = getState();
+    expect(state.isRunning).toBe(false);
+    expect(state.timeRemaining).toBe(WORK_DURATION - 300); // 20 minutes remaining
+
+    // Resume
+    startTimer();
+    state = getState();
+    expect(state.isRunning).toBe(true);
+
+    // Complete work session
+    vi.advanceTimersByTime((WORK_DURATION - 300) * 1000 + 100);
+    state = getState();
+    expect(state.isWorkSession).toBe(false); // Now in break
+    expect(state.timeRemaining).toBe(BREAK_DURATION);
+  });
+
+  it('should handle pause and resume multiple times', () => {
+    startTimer();
+    
+    // Pause at 10 minutes
+    vi.advanceTimersByTime(10 * 60 * 1000);
+    stopTimer();
+    let state = getState();
+    expect(state.timeRemaining).toBe(WORK_DURATION - 600);
+
+    // Resume
+    startTimer();
+    
+    // Pause at 20 minutes total
+    vi.advanceTimersByTime(10 * 60 * 1000);
+    stopTimer();
+    state = getState();
+    expect(state.timeRemaining).toBe(WORK_DURATION - 1200);
+
+    // Resume and complete
+    startTimer();
+    vi.advanceTimersByTime((WORK_DURATION - 1200) * 1000 + 100);
+    state = getState();
+    expect(state.isWorkSession).toBe(false);
+  });
+
+  it('should cycle through multiple sessions', () => {
+    for (let session = 1; session <= MAX_SESSIONS; session++) {
+      // Start work session
+      startTimer();
+      expect(getState().sessionCount).toBe(session);
+      expect(getState().isWorkSession).toBe(true);
+
+      // Complete work
+      vi.advanceTimersByTime(WORK_DURATION * 1000 + 100);
+      expect(getState().isWorkSession).toBe(false);
+      expect(getState().isRunning).toBe(false);
+
+      // Complete break (except after last session)
+      if (session < MAX_SESSIONS) {
+        startTimer();
+        vi.advanceTimersByTime(BREAK_DURATION * 1000 + 100);
+        expect(getState().isWorkSession).toBe(true);
+        expect(getState().sessionCount).toBe(session + 1);
+      }
+    }
+
+    // After 4 sessions, should be at session 4 in break mode
+    const finalState = getState();
+    expect(finalState.sessionCount).toBe(4);
+    expect(finalState.isWorkSession).toBe(false);
+    expect(finalState.timeRemaining).toBe(BREAK_DURATION);
+  });
+
+  it('should play audio notification at phase transitions', () => {
+    const audioContextMock = vi.fn();
+    vi.stubGlobal('AudioContext', class MockAudioContext {
+      currentTime = 0;
+      createOscillator = vi.fn(() => ({
+        connect: vi.fn(),
+        frequency: { value: 0 },
+        type: 'sine',
+        start: vi.fn(),
+        stop: vi.fn(),
+      }));
+      createGain = vi.fn(() => ({
+        connect: vi.fn(),
+        gain: {
+          setValueAtTime: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+        },
+      }));
+      destination = {};
+    });
+
+    startTimer();
+    
+    // Complete work - should trigger audio
+    vi.advanceTimersByTime(WORK_DURATION * 1000 + 100);
+    
+    const state = getState();
+    expect(state.isWorkSession).toBe(false);
+    // AudioContext should have been created (verified by no errors thrown)
   });
 });

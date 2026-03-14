@@ -27,8 +27,9 @@ const state: TimerState = {
 let timerDisplay: HTMLElement | null = null;
 let sessionTypeEl: HTMLElement | null = null;
 let sessionCountEl: HTMLElement | null = null;
-let startBtn: HTMLButtonElement | null = null;
-let pauseBtn: HTMLButtonElement | null = null;
+let controlBtn: HTMLButtonElement | null = null;
+let controlBtnIcon: HTMLElement | null = null;
+let controlBtnLabel: HTMLElement | null = null;
 let resetBtn: HTMLButtonElement | null = null;
 
 // AudioContext instance (created lazily for performance)
@@ -66,23 +67,26 @@ function updateDisplay(): void {
   sessionCountEl.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
 
   // Update colors based on session type
-  // Use classList to preserve other classes while toggling color
   const colorClass = state.isWorkSession ? 'text-tomato' : 'text-green-500';
   const oppositeClass = state.isWorkSession ? 'text-green-500' : 'text-tomato';
   sessionTypeEl.classList.remove(oppositeClass);
   sessionTypeEl.classList.add(colorClass);
 }
 
-// Update button visibility
-function updateButtons(): void {
-  if (!startBtn || !pauseBtn) return;
+// Update control button state (Start/Pause toggle)
+function updateControlButton(): void {
+  if (!controlBtnIcon || !controlBtnLabel || !controlBtn) return;
 
   if (state.isRunning) {
-    startBtn.classList.add('hidden');
-    pauseBtn.classList.remove('hidden');
+    // Show Pause state
+    controlBtnIcon.textContent = 'pause';
+    controlBtnLabel.textContent = 'Pause';
+    controlBtn.setAttribute('aria-label', 'Pause Timer');
   } else {
-    startBtn.classList.remove('hidden');
-    pauseBtn.classList.add('hidden');
+    // Show Start state
+    controlBtnIcon.textContent = 'play_arrow';
+    controlBtnLabel.textContent = 'Start';
+    controlBtn.setAttribute('aria-label', 'Start Timer');
   }
 }
 
@@ -135,6 +139,7 @@ function handleTimerComplete(): void {
   }
 
   updateDisplay();
+  updateControlButton();
 }
 
 // Tick handler with drift correction
@@ -162,7 +167,7 @@ export function startTimer(): void {
 
   state.intervalId = window.setInterval(tick, 100); // Check every 100ms for responsiveness
 
-  updateButtons();
+  updateControlButton();
   updateDisplay();
 }
 
@@ -176,8 +181,17 @@ export function stopTimer(): void {
   state.isRunning = false;
   state.targetEndTime = null;
 
-  updateButtons();
+  updateControlButton();
   updateDisplay();
+}
+
+// Toggle between start and stop
+function toggleTimer(): void {
+  if (state.isRunning) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
 }
 
 // Reset timer to initial state
@@ -200,18 +214,18 @@ function initApp(): void {
   timerDisplay = document.getElementById('timer-display') as HTMLElement;
   sessionTypeEl = document.getElementById('session-type') as HTMLElement;
   sessionCountEl = document.getElementById('session-count') as HTMLElement;
-  startBtn = document.getElementById('start-btn') as HTMLButtonElement;
-  pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
+  controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
+  controlBtnIcon = document.getElementById('control-btn-icon') as HTMLElement;
+  controlBtnLabel = document.getElementById('control-btn-label') as HTMLElement;
   resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 
-  if (!timerDisplay || !startBtn || !pauseBtn || !resetBtn) {
+  if (!timerDisplay || !controlBtn || !resetBtn) {
     console.error('Required DOM elements not found');
     return;
   }
 
   // Event listeners
-  startBtn.addEventListener('click', startTimer);
-  pauseBtn.addEventListener('click', stopTimer);
+  controlBtn.addEventListener('click', toggleTimer);
   resetBtn.addEventListener('click', resetTimer);
 
   // Initialize display
