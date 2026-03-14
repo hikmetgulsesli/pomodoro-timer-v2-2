@@ -3,6 +3,7 @@
  * Story US-009: Responsive design and visual polish
  */
 
+import { vi } from 'vitest';
 import {
   state,
   startTimer,
@@ -16,18 +17,18 @@ import {
 // Mock AudioContext
 class MockAudioContext {
   currentTime = 0;
-  createOscillator = jest.fn(() => ({
-    connect: jest.fn(),
+  createOscillator = vi.fn(() => ({
+    connect: vi.fn(),
     frequency: { value: 0 },
     type: 'sine',
-    start: jest.fn(),
-    stop: jest.fn()
+    start: vi.fn(),
+    stop: vi.fn()
   }));
-  createGain = jest.fn(() => ({
-    connect: jest.fn(),
+  createGain = vi.fn(() => ({
+    connect: vi.fn(),
     gain: {
-      setValueAtTime: jest.fn(),
-      exponentialRampToValueAtTime: jest.fn()
+      setValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn()
     }
   }));
   destination = {};
@@ -101,12 +102,12 @@ describe('Responsive Design', () => {
     `;
     document.head.appendChild(style);
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     initDOMElements();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -269,7 +270,7 @@ describe('Responsive Design', () => {
       // Start timer and let work session complete
       state.timeRemaining = 2;
       startTimer();
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
       
       updateDisplay();
       
