@@ -6,14 +6,18 @@
   "scripts": {
     "build": "esbuild src/main.ts --bundle --outfile=dist/main.js --format=iife --target=es2020",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "jest",
+    "test": "vitest run",
     "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hikmetgulsesli/pomodoro-timer-v2-2.git"
   },
-  "keywords": ["pomodoro", "timer", "productivity"],
+  "keywords": [
+    "pomodoro",
+    "timer",
+    "productivity"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -29,6 +33,7 @@
     "jest-environment-jsdom": "^29.5.0",
     "ts-jest": "^29.1.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript-eslint": "^8.57.0",
+    "vitest": "^4.1.0"
   }
 }

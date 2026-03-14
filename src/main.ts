@@ -219,7 +219,7 @@ function initApp(): void {
   controlBtnLabel = document.getElementById('control-btn-label') as HTMLElement;
   resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 
-  if (!timerDisplay || !controlBtn || !resetBtn) {
+  if (!timerDisplay || !controlBtn || !controlBtnIcon || !controlBtnLabel || !resetBtn) {
     console.error('Required DOM elements not found');
     return;
   }
