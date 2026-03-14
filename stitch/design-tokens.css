@@ -1,0 +1,18 @@
+/* design-tokens.css -- auto-generated from Stitch HTML */
+:root {
+  --color-primary: #137fec;
+  --color-background-light: #FAF9F6;
+  --color-background-dark: #101922;
+  --color-tomato: #E74C3C;
+  --color-slate-blue: #5D6D7E;
+  --color-orange-pause: #F39C12;
+  --color-gray-reset: #95A5A6;
+  --font-display: Space Grotesk, sans-serif;
+  --font-body: DM Sans, sans-serif;
+  --font-mono: SF Mono, Consolas, monospace;
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+  --font-google-0: Space Grotesk;
+}
