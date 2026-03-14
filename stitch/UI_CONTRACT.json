@@ -1,0 +1,77 @@
+[
+  {
+    "screenId": "fa1551ddef8a47a18677d3817d134e3b",
+    "screenTitle": "Pomodoro Timer Dashboard",
+    "deviceType": "DESKTOP",
+    "elements": [
+      {
+        "type": "button",
+        "label": "play_arrow\n\nStart",
+        "line": 53
+      },
+      {
+        "type": "button",
+        "label": "pause\n\nPause",
+        "line": 59
+      },
+      {
+        "type": "button",
+        "label": "replay\n\nReset",
+        "line": 65
+      },
+      {
+        "type": "button",
+        "label": "[icon: play_arrow]",
+        "line": 55
+      },
+      {
+        "type": "button",
+        "label": "[icon: pause]",
+        "line": 61
+      },
+      {
+        "type": "button",
+        "label": "[icon: replay]",
+        "line": 67
+      }
+    ],
+    "navigation": [],
+    "buttons": [
+      {
+        "type": "button",
+        "label": "play_arrow\n\nStart",
+        "line": 53
+      },
+      {
+        "type": "button",
+        "label": "pause\n\nPause",
+        "line": 59
+      },
+      {
+        "type": "button",
+        "label": "replay\n\nReset",
+        "line": 65
+      },
+      {
+        "type": "button",
+        "label": "[icon: play_arrow]",
+        "line": 55
+      },
+      {
+        "type": "button",
+        "label": "[icon: pause]",
+        "line": 61
+      },
+      {
+        "type": "button",
+        "label": "[icon: replay]",
+        "line": 67
+      }
+    ],
+    "inputs": [],
+    "hardcodedData": [],
+    "totalInteractive": 6,
+    "requiresRouter": false,
+    "requiresDragDrop": false
+  }
+]
