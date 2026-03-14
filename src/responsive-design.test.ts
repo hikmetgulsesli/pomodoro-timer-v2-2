@@ -115,7 +115,6 @@ describe('Responsive Design', () => {
 
   describe('Timer Font Sizes', () => {
     test('should have CSS custom properties for timer font sizes', () => {
-      const style = getComputedStyle(document.documentElement);
       // Verify the CSS variables are defined (they may return empty in JSDOM)
       const root = document.querySelector('style');
       expect(root?.textContent).toContain('--timer-font-size-mobile: 48px');
