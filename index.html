@@ -17,18 +17,18 @@
       theme: {
         extend: {
           colors: {
-            "primary": "#137fec",
-            "background-light": "#FAF9F6",
-            "background-dark": "#101922",
-            "tomato": "#E74C3C",
-            "slate-blue": "#5D6D7E",
-            "orange-pause": "#F39C12",
-            "gray-reset": "#95A5A6"
+            "primary": "var(--color-primary)",
+            "background-light": "var(--color-background-light)",
+            "background-dark": "var(--color-background-dark)",
+            "tomato": "var(--color-tomato)",
+            "slate-blue": "var(--color-slate-blue)",
+            "orange-pause": "var(--color-orange-pause)",
+            "gray-reset": "var(--color-gray-reset)"
           },
           fontFamily: {
-            "display": ["Space Grotesk", "sans-serif"],
-            "body": ["DM Sans", "sans-serif"],
-            "mono": ["SF Mono", "Consolas", "monospace"]
+            "display": ["var(--font-display)", "sans-serif"],
+            "body": ["var(--font-body)", "sans-serif"],
+            "mono": ["var(--font-mono)", "monospace"]
           },
         },
       },
@@ -40,7 +40,7 @@
     <header class="text-center">
       <h1 class="font-display text-4xl font-bold tracking-tight mb-2">Pomodoro Timer</h1>
     </header>
-    
+
     <div class="flex flex-col items-center gap-8 w-full">
       <div id="session-type" class="text-tomato font-display text-2xl font-bold tracking-widest uppercase">
         WORK
@@ -52,23 +52,16 @@
         Session 1 of 4
       </div>
     </div>
-    
+
     <div class="flex items-center justify-center gap-6 mt-4">
-      <button id="start-btn" aria-label="Start Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none cursor-pointer">
-        <div class="w-16 h-16 rounded-full bg-slate-blue flex items-center justify-center text-white shadow-sm">
-          <span class="material-symbols-outlined text-3xl ml-1">play_arrow</span>
+      <button id="control-btn" aria-label="Start Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
+        <div class="w-16 h-16 rounded-full bg-slate-blue flex items-center justify-center text-white shadow-sm transition-colors duration-200">
+          <span id="control-btn-icon" class="material-symbols-outlined text-3xl ml-1">play_arrow</span>
         </div>
-        <span class="text-sm font-medium text-slate-blue">Start</span>
+        <span id="control-btn-label" class="text-sm font-medium text-slate-blue transition-colors duration-200">Start</span>
       </button>
-      
-      <button id="pause-btn" aria-label="Pause Timer" class="hidden flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none cursor-pointer">
-        <div class="w-16 h-16 rounded-full bg-orange-pause flex items-center justify-center text-white shadow-sm">
-          <span class="material-symbols-outlined text-3xl">pause</span>
-        </div>
-        <span class="text-sm font-medium text-orange-pause">Pause</span>
-      </button>
-      
-      <button id="reset-btn" aria-label="Reset Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none cursor-pointer">
+
+      <button id="reset-btn" aria-label="Reset Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
         <div class="w-16 h-16 rounded-full bg-gray-reset flex items-center justify-center text-white shadow-sm">
           <span class="material-symbols-outlined text-3xl">replay</span>
         </div>
@@ -76,7 +69,7 @@
       </button>
     </div>
   </div>
-  
+
   <script src="dist/main.js"></script>
 </body>
 </html>
