@@ -1,2 +1,284 @@
-/* design-tokens.css -- auto-generated from Stitch HTML */
-@import url('../stitch/design-tokens.css');
+/* design-tokens.css -- CSS Custom Properties for Pomodoro Timer */
+/* Source: stitch/design-tokens.css - SINGLE SOURCE OF TRUTH */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  /* ========================================
+     COLORS
+     ======================================== */
+  /* Primary Palette */
+  --color-primary: #137fec;
+  --color-tomato: #E74C3C;
+  --color-slate-blue: #5D6D7E;
+  --color-orange-pause: #F39C12;
+  --color-gray-reset: #95A5A6;
+  
+  /* Background Colors */
+  --color-background-light: #FAF9F6;
+  --color-background-dark: #101922;
+  --color-off-white: #FAF9F6;
+  --color-charcoal: #1a1a1a;
+  
+  /* Semantic Colors */
+  --color-work: var(--color-tomato);
+  --color-break: #2ECC71;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #5D6D7E;
+  --color-text-light: #FAF9F6;
+  
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+  /* Font Families */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'SF Mono', Consolas, monospace;
+  
+  /* Font Stacks (fallbacks) */
+  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-content: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  
+  /* ========================================
+     SPACING (8px base unit)
+     ======================================== */
+  --space-0: 0;
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-4: 2rem;     /* 32px */
+  --space-5: 2.5rem;   /* 40px */
+  --space-6: 3rem;     /* 48px */
+  --space-7: 3.5rem;   /* 56px */
+  --space-8: 4rem;     /* 64px */
+  --space-9: 5rem;     /* 80px */
+  --space-10: 6rem;    /* 96px */
+  --space-12: 8rem;    /* 128px */
+  --space-16: 12rem;   /* 192px */
+  
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-DEFAULT: 0.25rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* ========================================
+     SHADOWS
+     ======================================== */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-DEFAULT: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* ========================================
+     TRANSITIONS
+     ======================================== */
+  --transition-duration-fast: 150ms;
+  --transition-duration-normal: 200ms;
+  --transition-duration-slow: 300ms;
+  --transition-timing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-timing-in: cubic-bezier(0.4, 0, 1, 1);
+  --transition-timing-out: cubic-bezier(0, 0, 0.2, 1);
+  --transition-timing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
+/* Mobile: < 480px (default styles) */
+/* Tablet: 480px - 768px */
+/* Desktop: > 768px */
+
+/* Mobile breakpoints (max-width) */
+@media (max-width: 479px) {
+  :root {
+    --container-max-width: 100%;
+    --container-padding: var(--space-4);
+    --timer-font-size: 3rem;
+  }
+}
+
+/* Tablet breakpoints */
+@media (min-width: 480px) and (max-width: 767px) {
+  :root {
+    --container-max-width: 100%;
+    --container-padding: var(--space-6);
+    --timer-font-size: 4rem;
+  }
+}
+
+/* Desktop breakpoints */
+@media (min-width: 768px) {
+  :root {
+    --container-max-width: 42rem;
+    --container-padding: var(--space-8);
+    --timer-font-size: 5rem;
+  }
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #f5f5f5;
+    --color-text-secondary: #a0a0a0;
+  }
+}
+
+.dark {
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #a0a0a0;
+}
+
+/* ========================================
+   SCREEN READER ONLY
+   ======================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only.focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========================================
+   FOCUS-VISIBLE STYLES
+   ======================================== */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.3);
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background-light);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+}
+
+/* Typography utilities */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ========================================
+   CONTAINER STYLES
+   ======================================== */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width, 42rem);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding, var(--space-6));
+  padding-right: var(--container-padding, var(--space-6));
+}
+
+.container-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

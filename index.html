@@ -42,30 +42,23 @@
     </header>
 
     <div class="flex flex-col items-center gap-8 w-full">
-      <div id="session-type" class="font-display text-2xl font-bold tracking-widest uppercase text-tomato">
+      <div id="session-type" class="text-tomato font-display text-2xl font-bold tracking-widest uppercase" aria-label="Current session type">
         WORK
       </div>
-      <div class="font-mono text-[80px] leading-none font-bold tracking-tighter text-slate-800 dark:text-slate-200" id="timer-display">
+      <div class="font-mono text-[80px] leading-none font-bold tracking-tighter text-slate-800 dark:text-slate-200" id="timer-display" aria-live="polite" aria-atomic="true" aria-label="Timer display">
         25:00
       </div>
-      <div id="session-count" class="text-lg text-slate-600 dark:text-slate-400 font-medium">
+      <div id="session-count" class="text-lg text-slate-600 dark:text-slate-400 font-medium" aria-label="Session count">
         Session 1 of 4
       </div>
     </div>
 
     <div class="flex items-center justify-center gap-6 mt-4">
-      <button id="start-btn" aria-label="Start Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
+      <button id="control-btn" aria-label="Start Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
         <div class="w-16 h-16 rounded-full bg-slate-blue flex items-center justify-center text-white shadow-sm transition-colors duration-200">
-          <span class="material-symbols-outlined text-3xl ml-1">play_arrow</span>
+          <span id="control-btn-icon" class="material-symbols-outlined text-3xl ml-1">play_arrow</span>
         </div>
-        <span class="text-sm font-medium text-slate-blue transition-colors duration-200">Start</span>
-      </button>
-
-      <button id="pause-btn" aria-label="Pause Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer" style="display: none;">
-        <div class="w-16 h-16 rounded-full bg-orange-pause flex items-center justify-center text-white shadow-sm transition-colors duration-200">
-          <span class="material-symbols-outlined text-3xl">pause</span>
-        </div>
-        <span class="text-sm font-medium text-orange-pause transition-colors duration-200">Pause</span>
+        <span id="control-btn-label" class="text-sm font-medium text-slate-blue transition-colors duration-200">Start</span>
       </button>
 
       <button id="reset-btn" aria-label="Reset Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
