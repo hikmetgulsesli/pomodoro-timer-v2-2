@@ -286,7 +286,7 @@ describe('Timer Completion', () => {
 
     expect(state.isWorkSession).toBe(false);
     expect(state.timeRemaining).toBe(BREAK_DURATION);
-    expect(state.isRunning).toBe(false);
+    expect(state.isRunning).toBe(true); // Auto-starts break phase
   });
 
   test('should switch back to work after break completes', () => {

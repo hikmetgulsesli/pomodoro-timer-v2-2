@@ -8,6 +8,7 @@ export interface TimerState {
   isWorkSession: boolean;
   sessionCount: number;
   intervalId: number | null;
+  lastTickTime: number | null; // timestamp for visibility API handling
 }
 
 export const WORK_DURATION = 25 * 60; // 25 minutes
@@ -21,6 +22,7 @@ export const state: TimerState = {
   isWorkSession: true,
   sessionCount: 1,
   intervalId: null,
+  lastTickTime: null,
 };
 
 // DOM Elements - lazy loaded
@@ -157,7 +159,7 @@ export function playNotificationSound(): void {
 /**
  * Handle timer completion - switch between work and break sessions
  */
-export function handleTimerComplete(): void {
+export function handleTimerComplete(autoStart: boolean = true): void {
   stopTimer();
   playNotificationSound();
 
@@ -180,6 +182,11 @@ export function handleTimerComplete(): void {
 
   updateDisplay();
   updateControlButton();
+
+  // Auto-start the next phase
+  if (autoStart) {
+    startTimer();
+  }
 }
 
 /**
@@ -190,7 +197,10 @@ export function startTimer(): void {
 
   state.isRunning = true;
   state.isPaused = false;
+  state.lastTickTime = Date.now();
+
   state.intervalId = window.setInterval(() => {
+    state.lastTickTime = Date.now();
     state.timeRemaining--;
 
     if (state.timeRemaining <= 0) {
@@ -216,6 +226,7 @@ export function pauseTimer(): void {
   }
   state.isRunning = false;
   state.isPaused = true;
+  // Keep lastTickTime for reference, resumeTimer will reset it
 
   updateControlButton();
 }
@@ -228,7 +239,10 @@ export function resumeTimer(): void {
 
   state.isRunning = true;
   state.isPaused = false;
+  state.lastTickTime = Date.now();
+
   state.intervalId = window.setInterval(() => {
+    state.lastTickTime = Date.now();
     state.timeRemaining--;
 
     if (state.timeRemaining <= 0) {
@@ -252,8 +266,36 @@ export function stopTimer(): void {
   }
   state.isRunning = false;
   state.isPaused = false;
+  state.lastTickTime = null;
 
   updateControlButton();
+}
+
+/**
+ * Handle visibility change - correct timer drift when tab becomes visible
+ * Uses document.visibilityState to detect background/foreground
+ */
+export function handleVisibilityChange(): void {
+  if (document.hidden || !state.isRunning || state.lastTickTime === null) {
+    return;
+  }
+
+  // Tab is now visible - calculate elapsed time since last tick
+  const now = Date.now();
+  const elapsedMs = now - state.lastTickTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
+
+  if (elapsedSeconds > 0) {
+    // Subtract elapsed seconds from remaining time
+    state.timeRemaining = Math.max(0, state.timeRemaining - elapsedSeconds);
+    state.lastTickTime = now;
+    updateDisplay();
+
+    // If timer completed while in background, handle completion
+    if (state.timeRemaining <= 0) {
+      handleTimerComplete();
+    }
+  }
 }
 
 /**
@@ -265,6 +307,7 @@ export function resetTimer(): void {
   state.sessionCount = 1;
   state.timeRemaining = WORK_DURATION;
   state.isPaused = false;
+  state.lastTickTime = null;
   updateDisplay();
   updateControlButton();
 }
@@ -294,6 +337,9 @@ function init(): void {
   // Event Listeners
   controlBtn?.addEventListener('click', handleControlClick);
   resetBtn?.addEventListener('click', resetTimer);
+
+  // Visibility API - handle tab backgrounding
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 
   // Initialize display on load
   updateDisplay();
