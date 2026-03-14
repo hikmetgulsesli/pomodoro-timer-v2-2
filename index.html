@@ -21,9 +21,13 @@
             "background-light": "var(--color-background-light)",
             "background-dark": "var(--color-background-dark)",
             "tomato": "var(--color-tomato)",
+            "tomato-hover": "var(--color-tomato-hover)",
             "slate-blue": "var(--color-slate-blue)",
+            "slate-blue-hover": "var(--color-slate-blue-hover)",
             "orange-pause": "var(--color-orange-pause)",
-            "gray-reset": "var(--color-gray-reset)"
+            "orange-pause-hover": "var(--color-orange-pause-hover)",
+            "gray-reset": "var(--color-gray-reset)",
+            "gray-reset-hover": "var(--color-gray-reset-hover)"
           },
           fontFamily: {
             "display": ["var(--font-display)", "sans-serif"],
@@ -34,36 +38,54 @@
       },
     }
   </script>
+  <style>
+    /* Responsive timer display using CSS custom properties */
+    #timer-display {
+      font-size: var(--timer-font-size-mobile);
+    }
+    
+    @media (min-width: 640px) {
+      #timer-display {
+        font-size: var(--timer-font-size-tablet);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      #timer-display {
+        font-size: var(--timer-font-size-desktop);
+      }
+    }
+  </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center justify-center">
-  <div class="w-full max-w-2xl px-6 py-12 flex flex-col items-center gap-12">
+  <div class="w-full max-w-2xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 flex flex-col items-center gap-8 sm:gap-10 lg:gap-12">
     <header class="text-center">
-      <h1 class="font-display text-4xl font-bold tracking-tight mb-2">Pomodoro Timer</h1>
+      <h1 class="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-2">Pomodoro Timer</h1>
     </header>
 
-    <div class="flex flex-col items-center gap-8 w-full">
-      <div id="session-type" class="text-tomato font-display text-2xl font-bold tracking-widest uppercase">
+    <div class="flex flex-col items-center gap-6 sm:gap-8 w-full">
+      <div id="session-type" class="text-tomato font-display text-xl sm:text-2xl font-bold tracking-widest uppercase" aria-label="Current session type">
         WORK
       </div>
-      <div class="font-mono text-[80px] leading-none font-bold tracking-tighter text-slate-800 dark:text-slate-200" id="timer-display">
+      <div class="font-mono leading-none font-bold tracking-tighter text-slate-800 dark:text-slate-200" id="timer-display" aria-live="polite" aria-atomic="true" aria-label="Timer display">
         25:00
       </div>
-      <div id="session-count" class="text-lg text-slate-600 dark:text-slate-400 font-medium">
+      <div id="session-count" class="text-base sm:text-lg text-slate-600 dark:text-slate-400 font-medium" aria-label="Session count">
         Session 1 of 4
       </div>
     </div>
 
-    <div class="flex items-center justify-center gap-6 mt-4">
-      <button id="control-btn" aria-label="Start Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
-        <div class="w-16 h-16 rounded-full bg-slate-blue flex items-center justify-center text-white shadow-sm transition-colors duration-200">
-          <span id="control-btn-icon" class="material-symbols-outlined text-3xl ml-1">play_arrow</span>
+    <div class="flex items-center justify-center gap-4 sm:gap-6 mt-2 sm:mt-4">
+      <button id="control-btn" aria-label="Start Timer" class="btn flex flex-col items-center justify-center gap-2 group focus:outline-none">
+        <div class="btn-circle bg-slate-blue flex items-center justify-center text-white">
+          <span id="control-btn-icon" class="material-symbols-outlined text-2xl sm:text-3xl ml-0.5">play_arrow</span>
         </div>
         <span id="control-btn-label" class="text-sm font-medium text-slate-blue transition-colors duration-200">Start</span>
       </button>
 
-      <button id="reset-btn" aria-label="Reset Timer" class="flex flex-col items-center justify-center gap-2 group hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg cursor-pointer">
-        <div class="w-16 h-16 rounded-full bg-gray-reset flex items-center justify-center text-white shadow-sm">
-          <span class="material-symbols-outlined text-3xl">replay</span>
+      <button id="reset-btn" aria-label="Reset Timer" class="btn flex flex-col items-center justify-center gap-2 group focus:outline-none">
+        <div class="btn-circle bg-gray-reset flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-2xl sm:text-3xl">replay</span>
         </div>
         <span class="text-sm font-medium text-gray-reset">Reset</span>
       </button>
