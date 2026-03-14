@@ -1,18 +1,19 @@
 {
   "name": "pomodoro-timer-v2-2",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Pomodoro Timer with 25min work / 5min break cycles",
+  "main": "dist/main.js",
   "scripts": {
     "build": "esbuild src/main.ts --bundle --outfile=dist/main.js --format=iife --target=es2020",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "vitest run"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hikmetgulsesli/pomodoro-timer-v2-2.git"
   },
-  "keywords": [],
+  "keywords": ["pomodoro", "timer", "productivity"],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -21,13 +22,13 @@
   "homepage": "https://github.com/hikmetgulsesli/pomodoro-timer-v2-2#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@testing-library/dom": "^10.4.1",
-    "@vitest/coverage-v8": "^4.1.0",
+    "@types/jest": "^29.5.0",
     "esbuild": "^0.27.4",
     "eslint": "^10.0.3",
-    "jsdom": "^28.1.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0",
-    "vitest": "^4.1.0"
+    "typescript-eslint": "^8.57.0"
   }
 }
