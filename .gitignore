@@ -1,0 +1,121 @@
+# === Dependencies ===
+node_modules/
+vendor/
+.pnp/
+.pnp.js
+Pods/
+.gradle/
+.dart_tool/
+.packages
+pubspec.lock
+
+# === Build outputs ===
+dist/
+build/
+out/
+*.tsbuildinfo
+*.js.map
+
+# === Web frameworks ===
+# Next.js
+.next/
+# Nuxt
+.nuxt/
+.output/
+# Angular
+.angular/
+# Svelte
+.svelte-kit/
+# Astro
+.astro/
+# Remix (uses build/)
+# Vite / Vanilla / Vue / SolidJS (uses dist/)
+# Vercel
+.vercel/
+
+# === Mobile — React Native / Expo ===
+ios/build/
+ios/Pods/
+android/app/build/
+android/.gradle/
+android/.idea/
+*.apk
+*.aab
+*.ipa
+*.dSYM.zip
+*.dSYM/
+.expo/
+expo-env.d.ts
+
+# === Mobile — Flutter ===
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+build/
+flutter_export_environment.sh
+
+# === Mobile — Kotlin / Gradle / Android ===
+*.class
+*.jar
+*.war
+*.aar
+.gradle/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# === iOS / Xcode / Swift ===
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+DerivedData/
+*.hmap
+*.xcuserstate
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+# === Ionic ===
+www/
+plugins/
+platforms/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env/
+
+# === Environment & secrets ===
+.env
+.env.local
+.env*.local
+.env.production
+.env.development
+
+# === IDE & OS ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === Caches & misc ===
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+.worktrees/
+.setfarm-step-output.txt
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
