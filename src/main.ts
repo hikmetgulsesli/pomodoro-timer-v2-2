@@ -65,10 +65,10 @@ function updateDisplay(): void {
   sessionTypeEl.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
   sessionCountEl.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
 
-  // Update colors based on session type
+  // Update phase indicator colors based on session type (red for work, green for break)
   // Use classList to preserve other classes while toggling color
-  const colorClass = state.isWorkSession ? 'text-tomato' : 'text-green-500';
-  const oppositeClass = state.isWorkSession ? 'text-green-500' : 'text-tomato';
+  const colorClass = state.isWorkSession ? 'text-tomato' : 'text-green-600';
+  const oppositeClass = state.isWorkSession ? 'text-green-600' : 'text-tomato';
   sessionTypeEl.classList.remove(oppositeClass);
   sessionTypeEl.classList.add(colorClass);
 }
