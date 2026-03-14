@@ -463,7 +463,7 @@ function handleControlClick(): void {
 function initApp(): void {
   initDOMElements();
 
-  if (!timerDisplay || !controlBtn || !resetBtn) {
+  if (!timerDisplay || !controlBtn || !controlBtnIcon || !controlBtnLabel || !resetBtn) {
     console.error('Required DOM elements not found');
     return;
   }
