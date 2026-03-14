@@ -22,7 +22,7 @@ const state: TimerState = {
 
 // DOM Elements
 const timerDisplay = document.getElementById('timer-display') as HTMLElement;
-const sessionLabel = document.getElementById('session-label') as HTMLElement;
+const sessionType = document.getElementById('session-type') as HTMLElement;
 const sessionCountDisplay = document.getElementById('session-count') as HTMLElement;
 const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
 const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
@@ -36,7 +36,7 @@ function formatTime(seconds: number): string {
 
 function updateDisplay(): void {
   timerDisplay.textContent = formatTime(state.timeRemaining);
-  sessionLabel.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
+  sessionType.textContent = state.isWorkSession ? 'WORK' : 'BREAK';
   sessionCountDisplay.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
   
   // Update colors based on session type
