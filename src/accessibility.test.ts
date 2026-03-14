@@ -3,6 +3,7 @@
  * Story US-008: Accessibility and keyboard navigation
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   state,
   startTimer,
@@ -10,9 +11,9 @@ import {
   resetTimer,
   updateDisplay,
   updateControlButton,
-  initDOMElements,
   announceState,
   getTimerStatusText,
+  initDOMElements,
   WORK_DURATION,
   MAX_SESSIONS
 } from './main';
@@ -20,26 +21,31 @@ import {
 // Mock AudioContext
 class MockAudioContext {
   currentTime = 0;
-  createOscillator = jest.fn(() => ({
-    connect: jest.fn(),
+  state = 'running';
+  createOscillator = vi.fn(() => ({
+    connect: vi.fn(),
     frequency: { value: 0 },
     type: 'sine',
-    start: jest.fn(),
-    stop: jest.fn()
+    start: vi.fn(),
+    stop: vi.fn()
   }));
-  createGain = jest.fn(() => ({
-    connect: jest.fn(),
+  createGain = vi.fn(() => ({
+    connect: vi.fn(),
     gain: {
-      setValueAtTime: jest.fn(),
-      exponentialRampToValueAtTime: jest.fn()
+      setValueAtTime: vi.fn(),
+      linearRampToValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn()
     }
   }));
   destination = {};
+  resume = vi.fn().mockResolvedValue(undefined);
 }
+
+const mockAudioContext = new MockAudioContext();
 
 Object.defineProperty(window, 'AudioContext', {
   writable: true,
-  value: MockAudioContext
+  value: vi.fn().mockImplementation(() => mockAudioContext)
 });
 
 describe('Accessibility - ARIA Labels', () => {
@@ -51,6 +57,7 @@ describe('Accessibility - ARIA Labels', () => {
     state.isWorkSession = true;
     state.sessionCount = 1;
     state.intervalId = null;
+    state.targetEndTime = null;
 
     // Setup DOM with accessibility attributes
     document.body.innerHTML = `
@@ -66,12 +73,17 @@ describe('Accessibility - ARIA Labels', () => {
       <button id="reset-btn" aria-label="Reset Timer">Reset</button>
     `;
 
-    jest.useFakeTimers();
+    // Initialize DOM elements
     initDOMElements();
+
+    // Initialize DOM elements
+    initDOMElements();
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -80,49 +92,49 @@ describe('Accessibility - ARIA Labels', () => {
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
   });
 
-  test('timer display should have aria-live="polite" attribute', () => {
+  it('timer display should have aria-live="polite" attribute', () => {
     const timerDisplay = document.getElementById('timer-display') as HTMLElement;
     expect(timerDisplay.getAttribute('aria-live')).toBe('polite');
   });
 
-  test('timer display should have aria-atomic="true" attribute', () => {
+  it('timer display should have aria-atomic="true" attribute', () => {
     const timerDisplay = document.getElementById('timer-display') as HTMLElement;
     expect(timerDisplay.getAttribute('aria-atomic')).toBe('true');
   });
 
-  test('control button should have accessible aria-label', () => {
+  it('control button should have accessible aria-label', () => {
     const controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
     expect(controlBtn.getAttribute('aria-label')).toBeTruthy();
   });
 
-  test('reset button should have accessible aria-label', () => {
+  it('reset button should have accessible aria-label', () => {
     const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
     expect(resetBtn.getAttribute('aria-label')).toBe('Reset Timer');
   });
 
-  test('session type should have aria-label describing its purpose', () => {
+  it('session type should have aria-label describing its purpose', () => {
     const sessionType = document.getElementById('session-type') as HTMLElement;
     expect(sessionType.getAttribute('aria-label')).toBe('Current session type');
   });
 
-  test('session count should have aria-label describing its purpose', () => {
+  it('session count should have aria-label describing its purpose', () => {
     const sessionCount = document.getElementById('session-count') as HTMLElement;
     expect(sessionCount.getAttribute('aria-label')).toBe('Session count');
   });
 
-  test('aria-label on control button should update to "Pause Timer" when running', () => {
+  it('aria-label on control button should update to "Pause Timer" when running', async () => {
     const controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
 
-    startTimer();
+    await startTimer();
     updateControlButton();
 
     expect(controlBtn.getAttribute('aria-label')).toBe('Pause Timer');
   });
 
-  test('aria-label on control button should update to "Resume Timer" when paused', () => {
+  it('aria-label on control button should update to "Resume Timer" when paused', async () => {
     const controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
 
-    startTimer();
+    await startTimer();
     pauseTimer();
     updateControlButton();
 
@@ -138,6 +150,7 @@ describe('Accessibility - Screen Reader Announcements', () => {
     state.isWorkSession = true;
     state.sessionCount = 1;
     state.intervalId = null;
+    state.targetEndTime = null;
 
     document.body.innerHTML = `
       <div id="session-type" aria-label="Current session type">WORK</div>
@@ -152,12 +165,14 @@ describe('Accessibility - Screen Reader Announcements', () => {
       <button id="reset-btn" aria-label="Reset Timer">Reset</button>
     `;
 
-    jest.useFakeTimers();
+    // Initialize DOM elements
     initDOMElements();
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -165,7 +180,7 @@ describe('Accessibility - Screen Reader Announcements', () => {
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
   });
 
-  test('announceState should create a screen-reader only announcement element', () => {
+  it('announceState should create a screen-reader only announcement element', () => {
     announceState('Test announcement');
 
     const announcement = document.querySelector('[role="status"]');
@@ -174,16 +189,16 @@ describe('Accessibility - Screen Reader Announcements', () => {
     expect(announcement?.getAttribute('aria-live')).toBe('polite');
   });
 
-  test('startTimer should announce to screen readers', () => {
-    startTimer();
+  it('startTimer should announce to screen readers', async () => {
+    await startTimer();
 
     const announcement = document.querySelector('[role="status"]');
     expect(announcement).toBeTruthy();
     expect(announcement?.textContent).toContain('Timer started');
   });
 
-  test('pauseTimer should announce to screen readers', () => {
-    startTimer();
+  it('pauseTimer should announce to screen readers', async () => {
+    await startTimer();
     // Clear the start announcement
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
 
@@ -194,8 +209,8 @@ describe('Accessibility - Screen Reader Announcements', () => {
     expect(announcement?.textContent).toContain('paused');
   });
 
-  test('resetTimer should announce to screen readers', () => {
-    startTimer();
+  it('resetTimer should announce to screen readers', async () => {
+    await startTimer();
     // Clear the start announcement
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
 
@@ -206,7 +221,7 @@ describe('Accessibility - Screen Reader Announcements', () => {
     expect(announcement?.textContent).toContain('reset');
   });
 
-  test('timer display should have dynamic aria-label with context', () => {
+  it('timer display should have dynamic aria-label with context', () => {
     const timerDisplay = document.getElementById('timer-display') as HTMLElement;
 
     updateDisplay();
@@ -216,7 +231,7 @@ describe('Accessibility - Screen Reader Announcements', () => {
     expect(ariaLabel).toContain('Work session');
   });
 
-  test('session type should update aria-label for break phase', () => {
+  it('session type should update aria-label for break phase', () => {
     const sessionType = document.getElementById('session-type') as HTMLElement;
 
     state.isWorkSession = false;
@@ -234,6 +249,7 @@ describe('Accessibility - State Not via Color Only', () => {
     state.isWorkSession = true;
     state.sessionCount = 1;
     state.intervalId = null;
+    state.targetEndTime = null;
 
     document.body.innerHTML = `
       <div id="session-type" aria-label="Current session type">WORK</div>
@@ -248,12 +264,14 @@ describe('Accessibility - State Not via Color Only', () => {
       <button id="reset-btn" aria-label="Reset Timer">Reset</button>
     `;
 
-    jest.useFakeTimers();
+    // Initialize DOM elements
     initDOMElements();
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -261,14 +279,14 @@ describe('Accessibility - State Not via Color Only', () => {
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
   });
 
-  test('control button text label conveys state, not just color', () => {
+  it('control button text label conveys state, not just color', async () => {
     const label = document.getElementById('control-btn-label') as HTMLElement;
 
     // Initial state
     expect(label.textContent).toBe('Start');
 
     // Running state
-    startTimer();
+    await startTimer();
     updateControlButton();
     expect(label.textContent).toBe('Pause');
 
@@ -278,7 +296,7 @@ describe('Accessibility - State Not via Color Only', () => {
     expect(label.textContent).toBe('Resume');
   });
 
-  test('session type displays WORK or BREAK text, not just color', () => {
+  it('session type displays WORK or BREAK text, not just color', () => {
     const sessionType = document.getElementById('session-type') as HTMLElement;
 
     // Work session
@@ -292,7 +310,7 @@ describe('Accessibility - State Not via Color Only', () => {
     expect(sessionType.textContent).toBe('BREAK');
   });
 
-  test('getTimerStatusText returns full state description', () => {
+  it('getTimerStatusText returns full state description', () => {
     // Stopped state
     state.isRunning = false;
     state.isPaused = false;
@@ -330,6 +348,7 @@ describe('Accessibility - Timer Completion Announcements', () => {
     state.isWorkSession = true;
     state.sessionCount = 1;
     state.intervalId = null;
+    state.targetEndTime = null;
 
     document.body.innerHTML = `
       <div id="session-type" aria-label="Current session type">WORK</div>
@@ -344,12 +363,14 @@ describe('Accessibility - Timer Completion Announcements', () => {
       <button id="reset-btn" aria-label="Reset Timer">Reset</button>
     `;
 
-    jest.useFakeTimers();
+    // Initialize DOM elements
     initDOMElements();
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -360,45 +381,48 @@ describe('Accessibility - Timer Completion Announcements', () => {
     });
   });
 
-  test('should announce when work session completes', () => {
+  it('should announce when work session completes', async () => {
     state.timeRemaining = 3;
-    startTimer();
+    await startTimer();
 
     // Clear start announcement
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
 
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
 
     const announcement = document.querySelector('[role="status"]');
+    expect(announcement).toBeTruthy();
     expect(announcement?.textContent).toContain('Work session complete');
   });
 
-  test('should announce when break session completes', () => {
+  it('should announce when break session completes', async () => {
     state.timeRemaining = 3;
     state.isWorkSession = false;
-    startTimer();
+    await startTimer();
 
     // Clear start announcement
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
 
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
 
     const announcement = document.querySelector('[role="status"]');
+    expect(announcement).toBeTruthy();
     expect(announcement?.textContent).toContain('Break complete');
   });
 
-  test('should announce when all sessions complete', () => {
+  it('should announce when all sessions complete', async () => {
     state.timeRemaining = 3;
     state.isWorkSession = false;
     state.sessionCount = MAX_SESSIONS;
-    startTimer();
+    await startTimer();
 
     // Clear start announcement
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
 
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
 
     const announcement = document.querySelector('[role="status"]');
+    expect(announcement).toBeTruthy();
     expect(announcement?.textContent).toContain('All sessions complete');
   });
 });
@@ -411,6 +435,7 @@ describe('Accessibility - Keyboard Navigation', () => {
     state.isWorkSession = true;
     state.sessionCount = 1;
     state.intervalId = null;
+    state.targetEndTime = null;
 
     document.body.innerHTML = `
       <div id="session-type" aria-label="Current session type">WORK</div>
@@ -425,12 +450,14 @@ describe('Accessibility - Keyboard Navigation', () => {
       <button id="reset-btn" aria-label="Reset Timer" class="focus:outline-none focus-visible:ring-2">Reset</button>
     `;
 
-    jest.useFakeTimers();
+    // Initialize DOM elements
     initDOMElements();
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     if (state.intervalId) {
       clearInterval(state.intervalId);
       state.intervalId = null;
@@ -438,7 +465,7 @@ describe('Accessibility - Keyboard Navigation', () => {
     document.querySelectorAll('.sr-only').forEach(el => el.remove());
   });
 
-  test('buttons should be focusable via keyboard', () => {
+  it('buttons should be focusable via keyboard', () => {
     const controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
     const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 
@@ -447,7 +474,7 @@ describe('Accessibility - Keyboard Navigation', () => {
     expect(resetBtn.tabIndex).toBe(0);
   });
 
-  test('buttons should have visible focus indicators via CSS classes', () => {
+  it('buttons should have visible focus indicators via CSS classes', () => {
     const controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
     const classList = Array.from(controlBtn.classList);
 

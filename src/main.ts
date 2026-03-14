@@ -15,7 +15,7 @@ export const BREAK_DURATION = 5 * 60; // 5 minutes
 export const MAX_SESSIONS = 4;
 
 // Module-level state
-const state: TimerState = {
+export const state: TimerState = {
   timeRemaining: WORK_DURATION,
   isRunning: false,
   isPaused: false,
@@ -123,7 +123,11 @@ export function getTimerStatusText(): string {
 }
 
 // Update the display
-function updateDisplay(): void {
+export function updateDisplay(): void {
+  if (!timerDisplay || !sessionLabel || !sessionCountDisplay) {
+    // Initialize elements if not already done (for testing)
+    initDOMElements();
+  }
   if (!timerDisplay || !sessionLabel || !sessionCountDisplay) return;
 
   const timeText = formatTime(state.timeRemaining);
@@ -149,7 +153,11 @@ function updateDisplay(): void {
 }
 
 // Update control button appearance based on timer state
-function updateControlButton(): void {
+export function updateControlButton(): void {
+  if (!controlBtn || !controlBtnIcon || !controlBtnLabel) {
+    // Initialize elements if not already done (for testing)
+    initDOMElements();
+  }
   if (!controlBtn || !controlBtnIcon || !controlBtnLabel) return;
 
   const btnDiv = controlBtn.querySelector('div');
@@ -453,13 +461,7 @@ function handleControlClick(): void {
 
 // Initialize the app
 function initApp(): void {
-  timerDisplay = document.getElementById('timer-display') as HTMLElement;
-  sessionLabel = document.getElementById('session-type') as HTMLElement;
-  sessionCountDisplay = document.getElementById('session-count') as HTMLElement;
-  controlBtn = document.getElementById('control-btn') as HTMLButtonElement;
-  controlBtnIcon = document.getElementById('control-btn-icon') as HTMLElement;
-  controlBtnLabel = document.getElementById('control-btn-label') as HTMLElement;
-  resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
+  initDOMElements();
 
   if (!timerDisplay || !controlBtn || !resetBtn) {
     console.error('Required DOM elements not found');
@@ -473,6 +475,19 @@ function initApp(): void {
   // Initialize display
   updateDisplay();
   updateControlButton();
+}
+
+/**
+ * Initialize DOM element references (exported for testing)
+ */
+export function initDOMElements(): void {
+  timerDisplay = document.getElementById('timer-display');
+  sessionLabel = document.getElementById('session-type');
+  sessionCountDisplay = document.getElementById('session-count');
+  controlBtn = document.getElementById('control-btn') as HTMLButtonElement | null;
+  controlBtnIcon = document.getElementById('control-btn-icon');
+  controlBtnLabel = document.getElementById('control-btn-label');
+  resetBtn = document.getElementById('reset-btn') as HTMLButtonElement | null;
 }
 
 // Initialize when DOM is ready - only in browser environment
