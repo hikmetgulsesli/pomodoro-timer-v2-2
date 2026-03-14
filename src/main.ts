@@ -29,10 +29,9 @@ export const state: TimerState = {
 let timerDisplay: HTMLElement | null = null;
 let sessionLabel: HTMLElement | null = null;
 let sessionCountDisplay: HTMLElement | null = null;
-let controlBtn: HTMLButtonElement | null = null;
+let startBtn: HTMLButtonElement | null = null;
+let pauseBtn: HTMLButtonElement | null = null;
 let resetBtn: HTMLButtonElement | null = null;
-let controlBtnIcon: HTMLElement | null = null;
-let controlBtnLabel: HTMLElement | null = null;
 
 /**
  * Initialize DOM element references
@@ -41,13 +40,12 @@ export function initDOMElements(): boolean {
   timerDisplay = document.getElementById('timer-display');
   sessionLabel = document.getElementById('session-type');
   sessionCountDisplay = document.getElementById('session-count');
-  controlBtn = document.getElementById('control-btn') as HTMLButtonElement | null;
+  startBtn = document.getElementById('start-btn') as HTMLButtonElement | null;
+  pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement | null;
   resetBtn = document.getElementById('reset-btn') as HTMLButtonElement | null;
-  controlBtnIcon = document.getElementById('control-btn-icon');
-  controlBtnLabel = document.getElementById('control-btn-label');
 
   return !!timerDisplay && !!sessionLabel && !!sessionCountDisplay &&
-         !!controlBtn && !!resetBtn && !!controlBtnIcon && !!controlBtnLabel;
+         !!startBtn && !!pauseBtn && !!resetBtn;
 }
 
 /**
@@ -62,40 +60,21 @@ export function formatTime(seconds: number): string {
 }
 
 /**
- * Update control button appearance based on timer state
+ * Update control button visibility based on timer state
  */
 export function updateControlButton(): void {
-  if (!controlBtn || !controlBtnIcon || !controlBtnLabel) return;
-
-  const btnDiv = controlBtn.querySelector('div');
+  if (!startBtn || !pauseBtn) return;
 
   if (state.isRunning) {
-    // Timer is running - show Pause
-    controlBtnIcon.textContent = 'pause';
-    controlBtnLabel.textContent = 'Pause';
-    controlBtn.setAttribute('aria-label', 'Pause Timer');
-    btnDiv?.classList.remove('bg-slate-blue');
-    btnDiv?.classList.add('bg-orange-pause');
-    controlBtnLabel.classList.remove('text-slate-blue');
-    controlBtnLabel.classList.add('text-orange-pause');
-  } else if (state.isPaused) {
-    // Timer is paused - show Resume
-    controlBtnIcon.textContent = 'play_arrow';
-    controlBtnLabel.textContent = 'Resume';
-    controlBtn.setAttribute('aria-label', 'Resume Timer');
-    btnDiv?.classList.remove('bg-orange-pause');
-    btnDiv?.classList.add('bg-slate-blue');
-    controlBtnLabel.classList.remove('text-orange-pause');
-    controlBtnLabel.classList.add('text-slate-blue');
+    // Timer is running - show Pause, hide Start
+    startBtn.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    pauseBtn.setAttribute('aria-label', 'Pause Timer');
   } else {
-    // Timer is stopped/initial - show Start
-    controlBtnIcon.textContent = 'play_arrow';
-    controlBtnLabel.textContent = 'Start';
-    controlBtn.setAttribute('aria-label', 'Start Timer');
-    btnDiv?.classList.remove('bg-orange-pause');
-    btnDiv?.classList.add('bg-slate-blue');
-    controlBtnLabel.classList.remove('text-orange-pause');
-    controlBtnLabel.classList.add('text-slate-blue');
+    // Timer is stopped or paused - show Start, hide Pause
+    startBtn.style.display = 'flex';
+    pauseBtn.style.display = 'none';
+    startBtn.setAttribute('aria-label', state.isPaused ? 'Resume Timer' : 'Start Timer');
   }
 }
 
@@ -335,7 +314,8 @@ function init(): void {
   }
 
   // Event Listeners
-  controlBtn?.addEventListener('click', handleControlClick);
+  startBtn?.addEventListener('click', handleControlClick);
+  pauseBtn?.addEventListener('click', handleControlClick);
   resetBtn?.addEventListener('click', resetTimer);
 
   // Visibility API - handle tab backgrounding
