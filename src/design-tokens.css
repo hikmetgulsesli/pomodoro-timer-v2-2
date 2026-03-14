@@ -14,6 +14,18 @@
   --color-orange-pause: #F39C12;
   --color-gray-reset: #95A5A6;
   
+  /* Hover State Colors (darker variants) */
+  --color-tomato-hover: #c0392b;
+  --color-slate-blue-hover: #4a5568;
+  --color-orange-pause-hover: #d68910;
+  --color-gray-reset-hover: #7f8c8d;
+  
+  /* Active State Colors */
+  --color-tomato-active: #a93226;
+  --color-slate-blue-active: #3d4852;
+  --color-orange-pause-active: #b7791f;
+  --color-gray-reset-active: #707b7c;
+  
   /* Background Colors */
   --color-background-light: #FAF9F6;
   --color-background-dark: #101922;
@@ -52,6 +64,11 @@
   --font-size-6xl: 3.75rem;
   --font-size-7xl: 4.5rem;
   --font-size-8xl: 6rem;
+  
+  /* Responsive Timer Font Sizes */
+  --timer-font-size-mobile: 48px;
+  --timer-font-size-tablet: 64px;
+  --timer-font-size-desktop: 80px;
   
   /* Font Weights */
   --font-weight-normal: 400;
@@ -111,6 +128,7 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 8px 16px -4px rgb(0 0 0 / 0.15), 0 4px 8px -4px rgb(0 0 0 / 0.1);
   
   /* ========================================
      TRANSITIONS
@@ -122,40 +140,146 @@
   --transition-timing-in: cubic-bezier(0.4, 0, 1, 1);
   --transition-timing-out: cubic-bezier(0, 0, 0.2, 1);
   --transition-timing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-transform: transform var(--transition-duration-normal) var(--transition-timing-default);
+  --transition-colors: background-color var(--transition-duration-normal) var(--transition-timing-default),
+                       color var(--transition-duration-normal) var(--transition-timing-default),
+                       border-color var(--transition-duration-normal) var(--transition-timing-default);
+  --transition-shadow: box-shadow var(--transition-duration-normal) var(--transition-timing-default);
+  --transition-all: all var(--transition-duration-normal) var(--transition-timing-default);
 }
 
 /* ========================================
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE BREAKPOINTS & TIMER FONT SIZES
    ======================================== */
-/* Mobile: < 480px (default styles) */
-/* Tablet: 480px - 768px */
-/* Desktop: > 768px */
 
-/* Mobile breakpoints (max-width) */
-@media (max-width: 479px) {
+/* Mobile: < 640px (default styles) - 48px timer font */
+@media (max-width: 639px) {
   :root {
     --container-max-width: 100%;
     --container-padding: var(--space-4);
-    --timer-font-size: 3rem;
+    --timer-font-size: var(--timer-font-size-mobile);
   }
 }
 
-/* Tablet breakpoints */
-@media (min-width: 480px) and (max-width: 767px) {
+/* Tablet: 640px - 1023px - 64px timer font */
+@media (min-width: 640px) and (max-width: 1023px) {
   :root {
     --container-max-width: 100%;
     --container-padding: var(--space-6);
-    --timer-font-size: 4rem;
+    --timer-font-size: var(--timer-font-size-tablet);
   }
 }
 
-/* Desktop breakpoints */
-@media (min-width: 768px) {
+/* Desktop: >= 1024px - 80px timer font */
+@media (min-width: 1024px) {
   :root {
     --container-max-width: 42rem;
     --container-padding: var(--space-8);
-    --timer-font-size: 5rem;
+    --timer-font-size: var(--timer-font-size-desktop);
   }
+}
+
+/* ========================================
+   BUTTON STYLES WITH HOVER & ACTIVE STATES
+   ======================================== */
+
+/* Base button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-transform), var(--transition-shadow);
+  will-change: transform;
+}
+
+/* Button circle container */
+.btn-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-all);
+}
+
+@media (min-width: 640px) {
+  .btn-circle {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+/* Button hover state - darker colors + shadow */
+.btn:hover .btn-circle {
+  box-shadow: var(--shadow-hover);
+}
+
+.btn:hover .bg-tomato {
+  background-color: var(--color-tomato-hover);
+}
+
+.btn:hover .bg-slate-blue {
+  background-color: var(--color-slate-blue-hover);
+}
+
+.btn:hover .bg-orange-pause {
+  background-color: var(--color-orange-pause-hover);
+}
+
+.btn:hover .bg-gray-reset {
+  background-color: var(--color-gray-reset-hover);
+}
+
+/* Button active state - scale effect */
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:active .btn-circle {
+  transform: scale(0.95);
+}
+
+.btn:active .bg-tomato {
+  background-color: var(--color-tomato-active);
+}
+
+.btn:active .bg-slate-blue {
+  background-color: var(--color-slate-blue-active);
+}
+
+.btn:active .bg-orange-pause {
+  background-color: var(--color-orange-pause-active);
+}
+
+.btn:active .bg-gray-reset {
+  background-color: var(--color-gray-reset-active);
+}
+
+/* Focus visible styles for accessibility */
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
+}
+
+/* ========================================
+   TIMER DISPLAY STYLES
+   ======================================== */
+.timer-display {
+  font-family: var(--font-mono);
+  font-size: var(--timer-font-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tighter);
+  color: var(--color-text-primary);
+  transition: font-size var(--transition-duration-slow) var(--transition-timing-default);
 }
 
 /* ========================================
@@ -270,6 +394,47 @@ body {
 }
 
 /* ========================================
+   RESPONSIVE LAYOUT UTILITIES
+   ======================================== */
+
+/* Gap utilities */
+.gap-responsive {
+  gap: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .gap-responsive {
+    gap: var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gap-responsive {
+    gap: var(--space-12);
+  }
+}
+
+/* Responsive padding */
+.py-responsive {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
+@media (min-width: 640px) {
+  .py-responsive {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+}
+
+@media (min-width: 1024px) {
+  .py-responsive {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+  }
+}
+
+/* ========================================
    REDUCED MOTION
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -280,5 +445,13 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  
+  .btn:active {
+    transform: none;
+  }
+  
+  .btn:active .btn-circle {
+    transform: none;
   }
 }
