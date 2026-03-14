@@ -31,6 +31,18 @@ let startBtn: HTMLButtonElement | null = null;
 let pauseBtn: HTMLButtonElement | null = null;
 let resetBtn: HTMLButtonElement | null = null;
 
+// AudioContext instance (created lazily for performance)
+let audioContext: AudioContext | null = null;
+
+function getAudioContext(): AudioContext {
+  if (!audioContext) {
+    const AudioContextClass = (window as unknown as { AudioContext: typeof AudioContext }).AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    audioContext = new AudioContextClass();
+  }
+  return audioContext;
+}
+
 // Format seconds to MM:SS
 export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -54,9 +66,11 @@ function updateDisplay(): void {
   sessionCountEl.textContent = `Session ${state.sessionCount} of ${MAX_SESSIONS}`;
 
   // Update colors based on session type
-  sessionTypeEl.className = state.isWorkSession
-    ? 'text-tomato font-display text-2xl font-bold tracking-widest uppercase'
-    : 'text-green-500 font-display text-2xl font-bold tracking-widest uppercase';
+  // Use classList to preserve other classes while toggling color
+  const colorClass = state.isWorkSession ? 'text-tomato' : 'text-green-500';
+  const oppositeClass = state.isWorkSession ? 'text-green-500' : 'text-tomato';
+  sessionTypeEl.classList.remove(oppositeClass);
+  sessionTypeEl.classList.add(colorClass);
 }
 
 // Update button visibility
@@ -74,25 +88,23 @@ function updateButtons(): void {
 
 // Play notification sound using Web Audio API
 export function playNotificationSound(): void {
-  const AudioContextClass = (window as unknown as { AudioContext: typeof AudioContext }).AudioContext ||
-    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  const audioContext = new AudioContextClass();
+  const ctx = getAudioContext();
 
   const playBeep = (frequency: number, duration: number, delay: number) => {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    gainNode.connect(ctx.destination);
 
     oscillator.frequency.value = frequency;
     oscillator.type = 'sine';
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + delay);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + delay + duration);
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + delay + duration);
 
-    oscillator.start(audioContext.currentTime + delay);
-    oscillator.stop(audioContext.currentTime + delay + duration);
+    oscillator.start(ctx.currentTime + delay);
+    oscillator.stop(ctx.currentTime + delay + duration);
   };
 
   // Play 3 beeps

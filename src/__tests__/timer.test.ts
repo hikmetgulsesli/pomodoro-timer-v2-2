@@ -48,9 +48,8 @@ describe('calculateTimeRemaining (Drift Correction)', () => {
     const now = Date.now();
     const targetEndTime = now + 25000; // 25 seconds in the future
     const remaining = calculateTimeRemaining(targetEndTime);
-    // Should be around 25 seconds (allowing for test execution time)
-    expect(remaining).toBeGreaterThanOrEqual(24);
-    expect(remaining).toBeLessThanOrEqual(26);
+    // Exact value since vi.useFakeTimers() mocks Date.now() deterministically
+    expect(remaining).toBe(25);
   });
 
   it('should return 0 for exact current time', () => {
@@ -62,9 +61,8 @@ describe('calculateTimeRemaining (Drift Correction)', () => {
     const now = Date.now();
     const targetEndTime = now + (25 * 60 * 1000); // 25 minutes
     const remaining = calculateTimeRemaining(targetEndTime);
-    // Should be around 1500 seconds (25 minutes)
-    expect(remaining).toBeGreaterThanOrEqual(1499);
-    expect(remaining).toBeLessThanOrEqual(1500);
+    // Exact value since vi.useFakeTimers() mocks Date.now() deterministically
+    expect(remaining).toBe(1500);
   });
 });
 
